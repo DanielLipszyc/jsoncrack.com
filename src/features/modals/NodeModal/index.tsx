@@ -56,6 +56,12 @@ export const NodeModal = ({ opened, onClose }: ModalProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState("");
 
+  const handleClose = useCallback(() => {
+    setIsEditing(false);
+    setEditedContent("");
+    onClose();
+  }, [onClose]);
+
   const handleEdit = useCallback(() => {
     setEditedContent(normalizeNodeData(nodeData?.text ?? []));
     setIsEditing(true);
@@ -113,57 +119,56 @@ export const NodeModal = ({ opened, onClose }: ModalProps) => {
   if (!nodeData) return null;
 
   return (
-    <Modal size="auto" opened={opened} onClose={onClose} centered withCloseButton={false}>
+    <Modal size="auto" opened={opened} onClose={handleClose} centered withCloseButton={false}>
       <Stack pb="sm" gap="sm">
         <Stack gap="xs">
           <Flex justify="space-between" align="center">
             <Text fz="xs" fw={500}>
               Content
             </Text>
-            <CloseButton onClick={onClose} />
+            <Flex gap="xs" align="center">
+              {isEditing ? (
+                <>
+                  <Button variant="default" onClick={handleCancel} size="xs">
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSave} color="green" size="xs">
+                    Save
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={handleEdit} color="blue" size="xs">
+                  Edit
+                </Button>
+              )}
+              <CloseButton onClick={handleClose} />
+            </Flex>
           </Flex>
 
           {isEditing ? (
-            <>
-              <Textarea
-                value={editedContent}
-                onChange={e => setEditedContent(e.currentTarget.value)}
-                placeholder="Enter JSON content"
-                minRows={6}
-                maxRows={12}
-                styles={{
-                  input: {
-                    fontFamily: "monospace",
-                    fontSize: "12px",
-                  },
-                }}
-              />
-              <Group justify="flex-end" gap="xs">
-                <Button variant="default" onClick={handleCancel}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSave} color="green">
-                  Save
-                </Button>
-              </Group>
-            </>
+            <Textarea
+              value={editedContent}
+              onChange={e => setEditedContent(e.currentTarget.value)}
+              placeholder="Enter JSON content"
+              minRows={6}
+              maxRows={12}
+              styles={{
+                input: {
+                  fontFamily: "monospace",
+                  fontSize: "12px",
+                },
+              }}
+            />
           ) : (
-            <>
-              <ScrollArea.Autosize mah={250} maw={600}>
-                <CodeHighlight
-                  code={normalizeNodeData(nodeData.text)}
-                  miw={350}
-                  maw={600}
-                  language="json"
-                  withCopyButton
-                />
-              </ScrollArea.Autosize>
-              <Flex justify="flex-end">
-                <Button onClick={handleEdit} color="blue">
-                  Edit
-                </Button>
-              </Flex>
-            </>
+            <ScrollArea.Autosize mah={250} maw={600}>
+              <CodeHighlight
+                code={normalizeNodeData(nodeData.text)}
+                miw={350}
+                maw={600}
+                language="json"
+                withCopyButton
+              />
+            </ScrollArea.Autosize>
           )}
         </Stack>
 
